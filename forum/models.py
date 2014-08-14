@@ -49,7 +49,7 @@ class Thread(models.Model):
     board = models.ForeignKey(Board, related_name='threads')
     user = models.ForeignKey(User, related_name='threads')
     create_time = models.DateTimeField(auto_now_add=True)
-    last_reply = models.DateTimeField(default='', blank=True)
+    last_reply = models.DateTimeField(blank=True)
 
     def __unicode__(self):
         return self.title

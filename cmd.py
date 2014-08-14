@@ -337,7 +337,8 @@ def reg_user(request):
                             nickname=username,
                             point=0)
         userinfo.save()
-    except:
+    except Exception, e:
+	logging.debug(e)
         aaa = 'failed'
 
     ret = {"ret":aaa}
