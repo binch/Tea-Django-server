@@ -21,32 +21,55 @@ class Migration(SchemaMigration):
         # Adding model 'Order'
         db.create_table('shop_order', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('addr', self.gf('django.db.models.fields.CharField')(default='', max_length=2550)),
+            ('phone', self.gf('django.db.models.fields.CharField')(default='', max_length=2550)),
+            ('contact', self.gf('django.db.models.fields.CharField')(default='', max_length=2550)),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('owner', self.gf('django.db.models.fields.related.ForeignKey')(related_name='orders', to=orm['auth.User'])),
             ('total', self.gf('django.db.models.fields.FloatField')()),
+            ('status', self.gf('django.db.models.fields.CharField')(default='new', max_length=255)),
+            ('pay', self.gf('django.db.models.fields.CharField')(default='cod', max_length=255)),
         ))
         db.send_create_signal('shop', ['Order'])
 
-        # Adding model 'Category'
-        db.create_table('shop_category', (
+        # Adding model 'ShopCategory'
+        db.create_table('shop_shopcategory', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('index', self.gf('django.db.models.fields.IntegerField')(default=10)),
+            ('index3', self.gf('django.db.models.fields.IntegerField')(default=10)),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('shop', self.gf('django.db.models.fields.related.ForeignKey')(related_name='cats', to=orm['shop.Shop'])),
         ))
-        db.send_create_signal('shop', ['Category'])
+        db.send_create_signal('shop', ['ShopCategory'])
 
         # Adding model 'Item'
         db.create_table('shop_item', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('sold', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('content', self.gf('django.db.models.fields.TextField')()),
+            ('images', self.gf('django.db.models.fields.TextField')(default='')),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('category', self.gf('django.db.models.fields.related.ForeignKey')(related_name='cats', to=orm['shop.Category'])),
+            ('category', self.gf('django.db.models.fields.related.ForeignKey')(related_name='cats', to=orm['shop.ShopCategory'])),
             ('price', self.gf('django.db.models.fields.FloatField')()),
         ))
         db.send_create_signal('shop', ['Item'])
+
+        # Adding model 'ItemComment'
+        db.create_table('shop_itemcomment', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(related_name='itemcomments', to=orm['auth.User'])),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=2550)),
+            ('content', self.gf('django.db.models.fields.TextField')()),
+            ('images', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
+            ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('ziwei', self.gf('django.db.models.fields.IntegerField')(default=3)),
+            ('xiangqi', self.gf('django.db.models.fields.IntegerField')(default=3)),
+            ('naipao', self.gf('django.db.models.fields.IntegerField')(default=3)),
+            ('yexing', self.gf('django.db.models.fields.IntegerField')(default=3)),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(related_name='comments', to=orm['shop.Item'])),
+        ))
+        db.send_create_signal('shop', ['ItemComment'])
 
         # Adding model 'OrderItem'
         db.create_table('shop_orderitem', (
@@ -57,6 +80,17 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('shop', ['OrderItem'])
 
+        # Adding model 'Promotion'
+        db.create_table('shop_promotion', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(related_name='promotions', to=orm['auth.User'])),
+            ('shop', self.gf('django.db.models.fields.related.ForeignKey')(default=0, related_name='promotions', to=orm['shop.Shop'])),
+            ('item', self.gf('django.db.models.fields.related.ForeignKey')(default=0, related_name='promotions', to=orm['shop.Item'])),
+            ('image_name', self.gf('django.db.models.fields.CharField')(max_length=255)),
+        ))
+        db.send_create_signal('shop', ['Promotion'])
+
 
     def backwards(self, orm):
         
@@ -66,14 +100,20 @@ class Migration(SchemaMigration):
         # Deleting model 'Order'
         db.delete_table('shop_order')
 
-        # Deleting model 'Category'
-        db.delete_table('shop_category')
+        # Deleting model 'ShopCategory'
+        db.delete_table('shop_shopcategory')
 
         # Deleting model 'Item'
         db.delete_table('shop_item')
 
+        # Deleting model 'ItemComment'
+        db.delete_table('shop_itemcomment')
+
         # Deleting model 'OrderItem'
         db.delete_table('shop_orderitem')
+
+        # Deleting model 'Promotion'
+        db.delete_table('shop_promotion')
 
 
     models = {
@@ -113,28 +153,41 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'shop.category': {
-            'Meta': {'object_name': 'Category'},
-            'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'index': ('django.db.models.fields.IntegerField', [], {'default': '10'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'shop': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'cats'", 'to': "orm['shop.Shop']"})
-        },
         'shop.item': {
             'Meta': {'object_name': 'Item'},
-            'category': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'cats'", 'to': "orm['shop.Category']"}),
+            'category': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'cats'", 'to': "orm['shop.ShopCategory']"}),
             'content': ('django.db.models.fields.TextField', [], {}),
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'images': ('django.db.models.fields.TextField', [], {'default': "''"}),
             'price': ('django.db.models.fields.FloatField', [], {}),
+            'sold': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'shop.itemcomment': {
+            'Meta': {'object_name': 'ItemComment'},
+            'content': ('django.db.models.fields.TextField', [], {}),
+            'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'images': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'to': "orm['shop.Item']"}),
+            'naipao': ('django.db.models.fields.IntegerField', [], {'default': '3'}),
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'itemcomments'", 'to': "orm['auth.User']"}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '2550'}),
+            'xiangqi': ('django.db.models.fields.IntegerField', [], {'default': '3'}),
+            'yexing': ('django.db.models.fields.IntegerField', [], {'default': '3'}),
+            'ziwei': ('django.db.models.fields.IntegerField', [], {'default': '3'})
         },
         'shop.order': {
             'Meta': {'object_name': 'Order'},
+            'addr': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550'}),
+            'contact': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550'}),
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'orders'", 'to': "orm['auth.User']"}),
+            'pay': ('django.db.models.fields.CharField', [], {'default': "'cod'", 'max_length': '255'}),
+            'phone': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550'}),
+            'status': ('django.db.models.fields.CharField', [], {'default': "'new'", 'max_length': '255'}),
             'total': ('django.db.models.fields.FloatField', [], {})
         },
         'shop.orderitem': {
@@ -144,6 +197,15 @@ class Migration(SchemaMigration):
             'item': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'orderitems'", 'to': "orm['shop.Item']"}),
             'order': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'items'", 'to': "orm['shop.Order']"})
         },
+        'shop.promotion': {
+            'Meta': {'object_name': 'Promotion'},
+            'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'image_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'item': ('django.db.models.fields.related.ForeignKey', [], {'default': '0', 'related_name': "'promotions'", 'to': "orm['shop.Item']"}),
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'promotions'", 'to': "orm['auth.User']"}),
+            'shop': ('django.db.models.fields.related.ForeignKey', [], {'default': '0', 'related_name': "'promotions'", 'to': "orm['shop.Shop']"})
+        },
         'shop.shop': {
             'Meta': {'object_name': 'Shop'},
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
@@ -151,6 +213,14 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'shops'", 'to': "orm['auth.User']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'shop.shopcategory': {
+            'Meta': {'object_name': 'ShopCategory'},
+            'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'index3': ('django.db.models.fields.IntegerField', [], {'default': '10'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'shop': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'cats'", 'to': "orm['shop.Shop']"})
         }
     }
 

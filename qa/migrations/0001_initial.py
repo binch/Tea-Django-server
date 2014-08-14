@@ -8,13 +8,24 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
+        # Adding model 'QACategory'
+        db.create_table('qa_qacategory', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=2550)),
+            ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal('qa', ['QACategory'])
+
         # Adding model 'Question'
         db.create_table('qa_question', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('ended', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=2550)),
             ('content', self.gf('django.db.models.fields.TextField')()),
+            ('images_1', self.gf('django.db.models.fields.CharField')(default='', max_length=2550)),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='questions', to=orm['auth.User'])),
+            ('category', self.gf('django.db.models.fields.related.ForeignKey')(related_name='questions', to=orm['qa.QACategory'])),
         ))
         db.send_create_signal('qa', ['Question'])
 
@@ -22,7 +33,9 @@ class Migration(SchemaMigration):
         db.create_table('qa_answer', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('content', self.gf('django.db.models.fields.TextField')()),
+            ('accepted', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('images_1', self.gf('django.db.models.fields.CharField')(default='', max_length=2550)),
             ('question', self.gf('django.db.models.fields.related.ForeignKey')(related_name='answers', to=orm['qa.Question'])),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='answers', to=orm['auth.User'])),
         ))
@@ -31,6 +44,9 @@ class Migration(SchemaMigration):
 
     def backwards(self, orm):
         
+        # Deleting model 'QACategory'
+        db.delete_table('qa_qacategory')
+
         # Deleting model 'Question'
         db.delete_table('qa_question')
 
@@ -77,17 +93,28 @@ class Migration(SchemaMigration):
         },
         'qa.answer': {
             'Meta': {'object_name': 'Answer'},
+            'accepted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'content': ('django.db.models.fields.TextField', [], {}),
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'images_1': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550'}),
             'question': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'answers'", 'to': "orm['qa.Question']"}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'answers'", 'to': "orm['auth.User']"})
         },
-        'qa.question': {
-            'Meta': {'object_name': 'Question'},
-            'content': ('django.db.models.fields.TextField', [], {}),
+        'qa.qacategory': {
+            'Meta': {'object_name': 'QACategory'},
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '2550'})
+        },
+        'qa.question': {
+            'Meta': {'object_name': 'Question'},
+            'category': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'questions'", 'to': "orm['qa.QACategory']"}),
+            'content': ('django.db.models.fields.TextField', [], {}),
+            'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'ended': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'images_1': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '2550'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'questions'", 'to': "orm['auth.User']"})
         }
