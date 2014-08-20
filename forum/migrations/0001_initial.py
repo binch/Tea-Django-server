@@ -8,6 +8,26 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
+        # Adding model 'Like'
+        db.create_table('forum_like', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(default=1, related_name='likes', to=orm['auth.User'])),
+            ('type', self.gf('django.db.models.fields.CharField')(default='forum', max_length=255)),
+            ('from_id', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal('forum', ['Like'])
+
+        # Adding model 'Favor'
+        db.create_table('forum_favor', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(default=1, related_name='favors', to=orm['auth.User'])),
+            ('type', self.gf('django.db.models.fields.CharField')(default='forum', max_length=255)),
+            ('from_id', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal('forum', ['Favor'])
+
         # Adding model 'AtMessage'
         db.create_table('forum_atmessage', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -37,6 +57,7 @@ class Migration(SchemaMigration):
         db.create_table('forum_board', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('desc', self.gf('django.db.models.fields.TextField')(default='test')),
             ('index3', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
@@ -52,7 +73,7 @@ class Migration(SchemaMigration):
             ('board', self.gf('django.db.models.fields.related.ForeignKey')(related_name='threads', to=orm['forum.Board'])),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='threads', to=orm['auth.User'])),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('last_reply', self.gf('django.db.models.fields.DateTimeField')(default='', blank=True)),
+            ('last_reply', self.gf('django.db.models.fields.DateTimeField')(blank=True)),
         ))
         db.send_create_signal('forum', ['Thread'])
 
@@ -88,6 +109,12 @@ class Migration(SchemaMigration):
 
     def backwards(self, orm):
         
+        # Deleting model 'Like'
+        db.delete_table('forum_like')
+
+        # Deleting model 'Favor'
+        db.delete_table('forum_favor')
+
         # Deleting model 'AtMessage'
         db.delete_table('forum_atmessage')
 
@@ -159,11 +186,28 @@ class Migration(SchemaMigration):
         },
         'forum.board': {
             'Meta': {'object_name': 'Board'},
+            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'desc': ('django.db.models.fields.TextField', [], {'default': "'test'"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'index3': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'forum.favor': {
+            'Meta': {'object_name': 'Favor'},
+            'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'from_id': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'type': ('django.db.models.fields.CharField', [], {'default': "'forum'", 'max_length': '255'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'related_name': "'favors'", 'to': "orm['auth.User']"})
+        },
+        'forum.like': {
+            'Meta': {'object_name': 'Like'},
+            'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'from_id': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'type': ('django.db.models.fields.CharField', [], {'default': "'forum'", 'max_length': '255'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'related_name': "'likes'", 'to': "orm['auth.User']"})
         },
         'forum.reply': {
             'Meta': {'object_name': 'Reply'},
@@ -181,7 +225,7 @@ class Migration(SchemaMigration):
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'images_1': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
-            'last_reply': ('django.db.models.fields.DateTimeField', [], {'default': "''", 'blank': 'True'}),
+            'last_reply': ('django.db.models.fields.DateTimeField', [], {'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'threads'", 'to': "orm['auth.User']"})
         },

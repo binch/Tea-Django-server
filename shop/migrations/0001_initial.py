@@ -11,6 +11,7 @@ class Migration(SchemaMigration):
         # Adding model 'Shop'
         db.create_table('shop_shop', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('desc', self.gf('django.db.models.fields.TextField')()),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
@@ -58,7 +59,7 @@ class Migration(SchemaMigration):
         # Adding model 'ItemComment'
         db.create_table('shop_itemcomment', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(related_name='itemcomments', to=orm['auth.User'])),
+            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(default='binch', related_name='itemcomments', to=orm['auth.User'])),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=2550)),
             ('content', self.gf('django.db.models.fields.TextField')()),
             ('images', self.gf('django.db.models.fields.TextField')(default='', blank=True)),
@@ -172,7 +173,7 @@ class Migration(SchemaMigration):
             'images': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'item': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'to': "orm['shop.Item']"}),
             'naipao': ('django.db.models.fields.IntegerField', [], {'default': '3'}),
-            'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'itemcomments'", 'to': "orm['auth.User']"}),
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'default': "'binch'", 'related_name': "'itemcomments'", 'to': "orm['auth.User']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '2550'}),
             'xiangqi': ('django.db.models.fields.IntegerField', [], {'default': '3'}),
             'yexing': ('django.db.models.fields.IntegerField', [], {'default': '3'}),
@@ -208,6 +209,7 @@ class Migration(SchemaMigration):
         },
         'shop.shop': {
             'Meta': {'object_name': 'Shop'},
+            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'desc': ('django.db.models.fields.TextField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
