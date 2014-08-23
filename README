@@ -1,0 +1,13 @@
+
+1. nginx.conf
+
+2. mysql server client, my.cnf
+
+3. nfs config server client, fstab /etc/exports
+[root@os ~]# /etc/init.d/rpcbind start && chkconfig --level 2345 rpcbind on
+[root@os ~]# /etc/init.d/nfs start  && chkconfig --level 2345 nfs on
+
+4. ./restart.sh
+
+5. /root/bak need 777 mode
+
