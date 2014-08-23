@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 class Shop(models.Model):
     active = models.BooleanField(default=True)
     title = models.CharField(max_length=255)
-    desc = models.TextField()
+    shop_desc = models.TextField()
     create_time = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey(User, related_name='shops')
     def __unicode__(self):

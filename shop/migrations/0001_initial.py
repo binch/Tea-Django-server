@@ -13,7 +13,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('desc', self.gf('django.db.models.fields.TextField')()),
+            ('shop_desc', self.gf('django.db.models.fields.TextField')()),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('owner', self.gf('django.db.models.fields.related.ForeignKey')(related_name='shops', to=orm['auth.User'])),
         ))
@@ -211,9 +211,9 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Shop'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'desc': ('django.db.models.fields.TextField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'owner': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'shops'", 'to': "orm['auth.User']"}),
+            'shop_desc': ('django.db.models.fields.TextField', [], {}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'shop.shopcategory': {

@@ -42,7 +42,7 @@ class AtMessage(models.Model):
     )
     user = models.ForeignKey(User, related_name='atmessages', default=1)
     type = models.CharField(max_length=255, choices=TYPES, default='forum')
-    read = models.CharField(max_length=255, choices=READ, default='unread')
+    read_status = models.CharField(max_length=255, choices=READ, default='unread')
     text = models.CharField(max_length=2550, default='')
     from_id = models.IntegerField(default=0)
     create_time = models.DateTimeField(auto_now_add=True)
@@ -53,7 +53,7 @@ class UserInfo(models.Model):
     user = models.OneToOneField(User)
     create_time = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=2550, default='', blank=True)
-    desc = models.CharField(max_length=2550, default='', blank=True)
+    user_desc = models.CharField(max_length=2550, default='', blank=True)
     deviceid = models.CharField(max_length=2550, default='', blank=True)
     thumb = models.CharField(max_length=2550, default='', blank=True)
     point = models.IntegerField(default=0)
@@ -65,7 +65,7 @@ class UserInfo(models.Model):
 class Board(models.Model):
     name = models.CharField(max_length=255)
     active = models.BooleanField(default=True)
-    desc = models.TextField(default='test')
+    board_desc = models.TextField(default='test')
     index3 = models.IntegerField(default=0)
     create_time = models.DateTimeField(auto_now_add=True)
     def __unicode__(self):

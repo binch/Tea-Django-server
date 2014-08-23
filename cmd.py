@@ -90,7 +90,7 @@ def notify_thread():
                     message.alert(x["text"].encode('utf-8'))
                     logging.debug(x["text"])
                     messages = AtMessage.objects.filter(user=user,
-                                                        read='unread',
+                                                        read_status='unread',
                                                        )
 
                     message.badge(messages.count())
@@ -138,7 +138,7 @@ def add_one_message(username, type, text, from_id):
     messages = AtMessage.objects.filter(user=user,
                                         type=type,
                                         from_id=from_id,
-                                        read='unread',
+                                        read_status='unread',
                                        )
     notify_one_user(username, text)
     if len(messages) > 0:
@@ -189,7 +189,7 @@ def shop_html(request,id, template="shop.html"):
     ctx = {"ret":"ok",
            "id":shop.id,
            "title":shop.title,
-           "desc":shop.desc,
+           "desc":shop.shop_desc,
            "username":shop.owner.username,
            "create_time":str(shop.create_time),
           }
@@ -289,7 +289,7 @@ def update_userinfo(request):
     except:
         pass
 
-    userinfo.desc = desc
+    userinfo.user_desc = desc
     userinfo.thumb = thumb
     userinfo.nickname = nickname
 
@@ -313,7 +313,7 @@ def get_userinfo(request):
     ret = {"ret":"ok",
            "nickname":userinfo.nickname,
            "thumb":userinfo.thumb,
-           "desc":userinfo.desc,
+           "desc":userinfo.user_desc,
            "point":userinfo.point,
            "grade":get_grade(userinfo.point),
           }
@@ -582,12 +582,12 @@ def get_thread(request):
         messages = AtMessage.objects.filter(user=user,
                                             type='forum',
                                             from_id=thread_id,
-                                            read='unread',
+                                            read_status='unread',
                                            )
         logging.debug('type = forum, from_id = ' + str(thread_id) + 
                       ' uername = ' + username)
         for m in messages:
-            m.read = 'read'
+            m.read_status = 'read'
             m.save()
     except:
         logging.debug("get_thread didnt' find the message")
@@ -937,7 +937,7 @@ def get_shops(request):
             "favor_count":favor_count,
             "favor":favor,
             "title":record.title,
-            "desc":record.desc,
+            "desc":record.shop_desc,
             "id":record.id,
         }
         shops.append(ar)
@@ -969,7 +969,7 @@ def get_boards(request):
             nr_unread = nr_thread
         ar = {
             "name":record.name,
-            "desc":record.desc,
+            "desc":record.board_desc,
             "nr_thread":nr_thread,
 	        "nr_unread_thread":nr_unread,
             "id":record.id,
@@ -1515,7 +1515,7 @@ def mark_read_atmessage(request):
     user = User.objects.get(username=username)
 
     atmessage = AtMessage.objects.get(id=int(atmessage))
-    atmessage.read = 'read'
+    atmessage.read_status = 'read'
     atmessage.save()
 
     ret = {"ret":"ok"}
@@ -1531,7 +1531,7 @@ def get_user_atmessages(request):
     for atmessage in atmessages:
         o = {"id":atmessage.id,
              "type":atmessage.type,
-             "read":atmessage.read,
+             "read_status":atmessage.read,
              "text":atmessage.text,
              "from_id":atmessage.from_id,
             }

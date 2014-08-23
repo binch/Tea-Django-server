@@ -33,7 +33,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(default=1, related_name='atmessages', to=orm['auth.User'])),
             ('type', self.gf('django.db.models.fields.CharField')(default='forum', max_length=255)),
-            ('read', self.gf('django.db.models.fields.CharField')(default='unread', max_length=255)),
+            ('read_status', self.gf('django.db.models.fields.CharField')(default='unread', max_length=255)),
             ('text', self.gf('django.db.models.fields.CharField')(default='', max_length=2550)),
             ('from_id', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
@@ -46,7 +46,7 @@ class Migration(SchemaMigration):
             ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('nickname', self.gf('django.db.models.fields.CharField')(default='', max_length=2550, blank=True)),
-            ('desc', self.gf('django.db.models.fields.CharField')(default='', max_length=2550, blank=True)),
+            ('user_desc', self.gf('django.db.models.fields.CharField')(default='', max_length=2550, blank=True)),
             ('deviceid', self.gf('django.db.models.fields.CharField')(default='', max_length=2550, blank=True)),
             ('thumb', self.gf('django.db.models.fields.CharField')(default='', max_length=2550, blank=True)),
             ('point', self.gf('django.db.models.fields.IntegerField')(default=0)),
@@ -58,7 +58,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('desc', self.gf('django.db.models.fields.TextField')(default='test')),
+            ('board_desc', self.gf('django.db.models.fields.TextField')(default='test')),
             ('index3', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('create_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
         ))
@@ -179,7 +179,7 @@ class Migration(SchemaMigration):
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'from_id': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'read': ('django.db.models.fields.CharField', [], {'default': "'unread'", 'max_length': '255'}),
+            'read_status': ('django.db.models.fields.CharField', [], {'default': "'unread'", 'max_length': '255'}),
             'text': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550'}),
             'type': ('django.db.models.fields.CharField', [], {'default': "'forum'", 'max_length': '255'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'related_name': "'atmessages'", 'to': "orm['auth.User']"})
@@ -187,8 +187,8 @@ class Migration(SchemaMigration):
         'forum.board': {
             'Meta': {'object_name': 'Board'},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'board_desc': ('django.db.models.fields.TextField', [], {'default': "'test'"}),
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'desc': ('django.db.models.fields.TextField', [], {'default': "'test'"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'index3': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
@@ -239,13 +239,13 @@ class Migration(SchemaMigration):
         'forum.userinfo': {
             'Meta': {'object_name': 'UserInfo'},
             'create_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'desc': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550', 'blank': 'True'}),
             'deviceid': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nickname': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550', 'blank': 'True'}),
             'point': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'thumb': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
+            'user_desc': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '2550', 'blank': 'True'})
         },
         'forum.userthreadcount': {
             'Meta': {'object_name': 'UserThreadCount'},
