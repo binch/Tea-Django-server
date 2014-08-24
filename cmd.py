@@ -1175,7 +1175,7 @@ def post_question(request):
 def del_thread(request):
     username = request.GET.get('username')
     password = request.GET.get('password')
-    thread_id = request.GET.get('thread')
+    thread_id = request.GET.get('id')
 
     try:
         thread = Thread.objects.get(id=int(thread_id))
@@ -1193,7 +1193,7 @@ def del_thread(request):
 def del_comment(request):
     username = request.GET.get('username')
     password = request.GET.get('password')
-    comment_id = request.GET.get('comment')
+    comment_id = request.GET.get('id')
 
     try:
         comment = Reply.objects.get(id=int(comment_id))
