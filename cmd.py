@@ -1567,7 +1567,7 @@ def get_user_atmessages(request):
     for atmessage in atmessages:
         o = {"id":atmessage.id,
              "type":atmessage.type,
-             "read_status":atmessage.read,
+             "read":atmessage.read_status,
              "text":atmessage.text,
              "from_id":atmessage.from_id,
             }
