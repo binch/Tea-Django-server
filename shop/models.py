@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Shop(models.Model):
+    active = models.BooleanField(default=True)
     title = models.CharField(max_length=255)
     desc = models.TextField()
     create_time = models.DateTimeField(auto_now_add=True)
@@ -56,7 +57,7 @@ class Item(models.Model):
 
 
 class ItemComment(models.Model):
-    owner = models.ForeignKey(User, related_name='itemcomments')
+    owner = models.ForeignKey(User, related_name='itemcomments', default='binch')
     title = models.CharField(max_length=2550)
     content = models.TextField()
     images = models.TextField(default='', blank=True)

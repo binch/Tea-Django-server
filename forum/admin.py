@@ -1,6 +1,20 @@
 from django.contrib import admin
 from forum import models
 
+class LikeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'type', 'from_id')
+    pass
+
+admin.site.register(models.Like, LikeAdmin)
+
+class FavorAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'type', 'from_id')
+    pass
+
+admin.site.register(models.Favor, FavorAdmin)
+
+
+
 class AtMessageAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'text', 'type', 'create_time')
     pass
@@ -24,14 +38,14 @@ class ReplyInline(admin.TabularInline):
 
 class ThreadAdmin(admin.ModelAdmin):
     inlines = [ReplyInline,]
-    search_fields=['title'] 
+    search_fields=['title', 'content'] 
     list_display = ('id', 'content', 'create_time', 'user')
     pass
 
 admin.site.register(models.Thread, ThreadAdmin)
 
 class ReplyAdmin(admin.ModelAdmin):
-    search_fields=['content'] 
+    search_fields=['content', 'user'] 
     list_display = ('content', 'create_time', 'user')
     pass
 

@@ -14,6 +14,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from friend.models import *
 from forum.models import ThreadImage 
 from forum.models import Thread
+from forum.models import Like, Favor
 from forum.models import Board 
 from forum.models import UserInfo 
 from forum.models import Reply 
@@ -226,23 +227,37 @@ def question_html(request,id, template="question.html"):
 
 def thread_html(request,id, template="thread.html"):
     thread = Thread.objects.get(id=int(id))
-    comments = Reply.objects.filter(thread=thread).order_by('-id')
+    comments = Reply.objects.filter(thread=thread).order_by('id')
     cc = []
     for comment in comments:
+        iii = comment.images_1.split(',')
+        images = []
+        for ii in iii:
+            images.append(ii)
         c = {"username":comment.user.username,
+            "nickname":comment.user.userinfo.nickname,
              "id":comment.id,
-             "images":comment.images_1,
+             "images":images,
+             "thumb":comment.user.userinfo.thumb,
              "content":comment.content,
              "create_time":str(comment.create_time),
             }
         cc.append(c)
 
+    iii = thread.images_1.split(',')
+    images = []
+    for ii in iii:
+        if ii != '':
+            images.append(ii)
+
     ctx = {"ret":"ok",
+            "nickname":thread.user.userinfo.nickname,
+            "grade":get_grade(thread.user.userinfo.point),
+           "thumb":thread.user.userinfo.thumb,
            "id":thread.id,
-           "images":comment.images_1,
            "title":thread.title,
            "content":thread.content,
-           "images":thread.images_1,
+           "images":images,
            "username":thread.user.username,
            "create_time":str(thread.create_time),
            "comments":cc,
@@ -419,9 +434,57 @@ def get_item_comments(request):
 
 
 def get_item(request):
+    username = request.GET.get('username')
+    try:
+        user = User.objects.get(username=username)
+    except:
+        user = None
+
     id = request.GET.get('item')
     item = Item.objects.get(id=int(id))
+    favor = False
+    try:
+        ll = Favor.objects.get(user=user, type="item",
+                               from_id=item.id)
+        if ll != None:
+            favor = True
+        else:
+            favor = False
+    except:
+        pass
+    like = False
+    try:
+        ll = Like.objects.get(user=user, type="item",
+                              from_id=item.id)
+        if ll != None:
+            like = True
+        else:
+            like = False
+    except:
+        pass
+    like_count = 0
+    try:
+        ll = Like.objects.filter(type="item",
+                                 from_id=item.id)
+        if ll != None:
+            like_count = ll.count()
+    except:
+        pass
+    favor_count = 0
+    try:
+        ll = Favor.objects.filter(type="item",
+                                  from_id=item.id)
+        if ll != None:
+            favor_count = ll.count()
+    except:
+        pass
+
+
     a = {"title":item.title,
+         "like":like,
+         "favor":favor,
+         "like_count":like_count,
+         "favor_count":favor_count,
          "price":item.price,
          "id":item.id,
          "images":item.images,
@@ -437,6 +500,11 @@ def get_thread(request):
     username = request.GET.get('username')
     thread = Thread.objects.get(id=int(thread_id))
     comments = Reply.objects.filter(thread=thread).order_by('id')
+    try:
+        user = User.objects.get(username=username)
+    except:
+        pass
+
     cc = []
     for comment in comments:
         c = {"username":comment.user.username,
@@ -450,7 +518,52 @@ def get_thread(request):
             }
         cc.append(c)
 
+    favor = False
+    try:
+        ll = Favor.objects.get(user=user, type="thread",
+                               from_id=int(thread_id))
+        if ll != None:
+            favor = True
+        else:
+            favor = False
+    except:
+        pass
+
+    like = False
+    try:
+        ll = Like.objects.get(user=user, type="thread",
+                              from_id=int(thread_id))
+        if ll != None:
+            like = True
+        else:
+            like = False
+    except:
+        pass
+
+    like_count = 0
+    try:
+        ll = Like.objects.filter(type="thread",
+                              from_id=int(thread_id))
+        if ll != None:
+            like_count = ll.count()
+    except:
+        pass
+
+    favor_count = 0
+    try:
+        ll = Favor.objects.filter(type="thread",
+                              from_id=int(thread_id))
+        if ll != None:
+            favor_count = ll.count()
+    except:
+        pass
+
+
     ret = {"ret":"ok",
+           "like":like,
+           "favor":favor,
+           "like_count":like_count,
+           "favor_count":favor_count,
            "id":thread.id,
            "images":thread.images_1,
            "title":thread.title,
@@ -564,10 +677,83 @@ def get_questions(request):
     return HttpResponse(str1)
 
 def get_all_items(request):
-    records = Item.objects.all().order_by('-id')
+    username = request.GET.get('username')
+    try:
+        user = User.objects.get(username=username)
+    except:
+        user = None
+
+    type = request.GET.get('type', 'normal')
+
+    items = []
     aa = []
-    for item in records:
+    if type == "normal":
+        shops = Shop.objects.filter(active=True)
+        for shop in shops:
+            records = ShopCategory.objects.filter(shop=shop).order_by('-index3')
+            for record in records:
+                ii = Item.objects.filter(category=record).order_by('-id')
+                for i in ii:
+                    items.append(i)
+    elif type == "favor":
+        his_username = request.GET.get('his_username')
+        try:
+            his_user = User.objects.get(username=his_username)
+        except:
+            his_user = None
+
+        rrr = Favor.objects.filter(user=his_user, type='item')
+        for rr in rrr:
+            try:
+                ii = Item.objects.get(id=rr.from_id)
+                items.append(ii)
+            except:
+                pass
+        logging.debug("len = " + str(len(items)))
+
+    for item in items:
+        favor = False
+        try:
+            ll = Favor.objects.get(user=user, type="item",
+                                   from_id=item.id)
+            if ll != None:
+                favor = True
+            else:
+                favor = False
+        except:
+            pass
+        like = False
+        try:
+            ll = Like.objects.get(user=user, type="item",
+                                  from_id=item.id)
+            if ll != None:
+                like = True
+            else:
+                like = False
+        except:
+            pass
+        like_count = 0
+        try:
+            ll = Like.objects.filter(type="item",
+                                     from_id=item.id)
+            if ll != None:
+                like_count = ll.count()
+        except:
+            pass
+        favor_count = 0
+        try:
+            ll = Favor.objects.filter(type="item",
+                                      from_id=item.id)
+            if ll != None:
+                favor_count = ll.count()
+        except:
+            pass
+
         a = {"title":item.title,
+             "like":like,
+             "favor":favor,
+             "like_count":like_count,
+             "favor_count":favor_count,
              "price":item.price,
              "id":item.id,
              "images":item.images,
@@ -575,11 +761,16 @@ def get_all_items(request):
              "sold":item.sold,
             }
         aa.append(a)
-
     str1 = json.dumps(aa)
     return HttpResponse(str1)
 
 def get_shop_cats(request):
+    username = request.GET.get('username')
+    try:
+        user = User.objects.get(username=username)
+    except:
+        user = None
+
     shop_id = request.GET.get("shop")
     shop = Shop.objects.get(id=int(shop_id))
     records = ShopCategory.objects.filter(shop=shop).order_by('-index3')
@@ -588,7 +779,48 @@ def get_shop_cats(request):
         items = Item.objects.filter(category=record)
         aa = []
         for item in items:
+            favor = False
+            try:
+                ll = Favor.objects.get(user=user, type="item",
+                                       from_id=item.id)
+                if ll != None:
+                    favor = True
+                else:
+                    favor = False
+            except:
+                pass
+            like = False
+            try:
+                ll = Like.objects.get(user=user, type="item",
+                                      from_id=item.id)
+                if ll != None:
+                    like = True
+                else:
+                    like = False
+            except:
+                pass
+            like_count = 0
+            try:
+                ll = Like.objects.filter(type="item",
+                                         from_id=item.id)
+                if ll != None:
+                    like_count = ll.count()
+            except:
+                pass
+            favor_count = 0
+            try:
+                ll = Favor.objects.filter(type="item",
+                                          from_id=item.id)
+                if ll != None:
+                    favor_count = ll.count()
+            except:
+                pass
+
             a = {"title":item.title,
+                 "like":like,
+                 "favor":favor,
+                 "like_count":like_count,
+                 "favor_count":favor_count,
                  "price":item.price,
                  "id":item.id,
                  "images":item.images,
@@ -635,10 +867,75 @@ def get_promotions(request):
     return HttpResponse(str1)
 
 def get_shops(request):
-    records = Shop.objects.all()
+    type = request.GET.get('type', 'normal')
+    username = request.GET.get('username')
+    try:
+        user = User.objects.get(username=username)
+    except:
+        user = None
+
+    if type == "normal":
+        records = Shop.objects.filter(active=True)
+    elif type == "favor":
+        his_username = request.GET.get('his_username')
+        try:
+            his_user = User.objects.get(username=his_username)
+        except:
+            his_user = None
+        rrr = Favor.objects.filter(user=his_user)
+        records = []
+        for rr in rrr:
+            try:
+                record = Shop.objects.get(id=rr.from_id)
+                if record.active == True:
+                    records.append(record)
+            except:
+                pass
+
     shops = []
     for record in records:
+        favor = False
+        try:
+            ll = Favor.objects.get(user=user, type="shop",
+                                   from_id=record.id)
+            if ll != None:
+                favor = True
+            else:
+                favor = False
+        except:
+            pass
+        like = False
+        try:
+            ll = Like.objects.get(user=user, type="shop",
+                                  from_id=record.id)
+            if ll != None:
+                like = True
+            else:
+                like = False
+        except:
+            pass
+        like_count = 0
+        try:
+            ll = Like.objects.filter(type="shop",
+                                     from_id=record.id)
+            if ll != None:
+                like_count = ll.count()
+        except:
+            pass
+        favor_count = 0
+        try:
+            ll = Favor.objects.filter(type="shop",
+                                      from_id=record.id)
+            if ll != None:
+                favor_count = ll.count()
+        except:
+            pass
+
         ar = {
+            "like":like,
+            "like_count":like_count,
+            "favor_count":favor_count,
+            "favor":favor,
             "title":record.title,
             "desc":record.desc,
             "id":record.id,
@@ -655,7 +952,7 @@ def get_boards(request):
     except:
         user = None
 
-    records = Board.objects.all().order_by('index3')
+    records = Board.objects.filter(active=True).order_by('index3')
     boards = []
     for record in records:
         nr_thread = Thread.objects.filter(board=record).count()
@@ -713,6 +1010,47 @@ def post_item_comment(request):
     str1 = json.dumps(ret)
     return HttpResponse(str1)
 
+def like(request):
+    cmd = request.GET.get('cmd')
+    id = request.GET.get('id')
+    username = request.GET.get('username')
+    user = User.objects.get(username=username)
+    password = request.GET.get('password')
+    type = request.GET.get('type')
+
+    if cmd == "like" or cmd == "unlike":
+        repo = Like
+    else:
+        repo = Favor
+ 
+    if cmd == "like" or cmd == "favor":
+        try:
+            one = repo.objects.get(user=user,from_id=int(id),type=type)
+        except:
+            one = None
+        if one != None:
+            ret = {"ret":"already have"}
+            str1 = json.dumps(ret)
+            return HttpResponse(str1)
+        like = repo(
+            user=user,
+            from_id=id,
+            type=type,
+        )
+        like.save()
+        ret = {"ret":"ok"}
+        str1 = json.dumps(ret)
+        return HttpResponse(str1)
+
+    if cmd == "unlike" or cmd == "unfavor":
+        try:
+            one = repo.objects.get(user=user,from_id=int(id),type=type)
+            one.delete()
+        except:
+            pass
+        ret = {"ret":"ok"}
+        str1 = json.dumps(ret)
+        return HttpResponse(str1)
 
 def post_answer(request):
     question_id = request.GET.get('question')
@@ -883,26 +1221,12 @@ def post_thread(request):
 
     return HttpResponse(str1)
 
-def get_threads(request):
+def get_user_threads(request):
     page = request.GET.get("page", 1)
     page = int(page)
-    board_id = request.GET.get('board')
-    board = Board.objects.get(id=int(board_id))
-    records = Thread.objects.filter(board=board).order_by('-last_reply')
-
-    try:
-        username = request.GET.get('username')
-        user = User.objects.get(username=username)
-    except:
-        user = None
-
-    if user != None:
-        try:
-            readcount = UserThreadCount.objects.get(user=user,board=board)
-            readcount.readed_count = records.count()
-        except:
-            readcount = UserThreadCount(user=user,board=board,readed_count=records.count())
-        readcount.save()
+    username = request.GET.get('username')
+    user = User.objects.get(username=username)
+    records = Thread.objects.filter(user=user).order_by('-id')
 
     paginator = Paginator(records, 10)
     threads = []
@@ -942,12 +1266,147 @@ def get_threads(request):
                 }
                 threads.append(ar)
             except:
-                logging.debug("get_threads exception")
+                logging.debug("get_user_threads exception")
     except:
         logging.debug("page no")
 
     str1 = json.dumps(threads)
     return HttpResponse(str1)
+
+def get_threads(request):
+    type = request.GET.get("type", "board")
+    page = request.GET.get("page", 1)
+    page = int(page)
+
+    try:
+        username = request.GET.get('username')
+        user = User.objects.get(username=username)
+    except:
+        logging.debug("get_threads user except")
+        user = None
+
+    if type == "board":
+        board_id = request.GET.get('board')
+        board = Board.objects.get(id=int(board_id))
+        records = Thread.objects.filter(board=board).order_by('-last_reply')
+        if user != None:
+            try:
+                readcount = UserThreadCount.objects.get(user=user,board=board)
+                readcount.readed_count = records.count()
+            except:
+                logging.debug("get_threads readcount except")
+                readcount = UserThreadCount(user=user,board=board,readed_count=records.count())
+            readcount.save()
+    elif type == "favor":
+        records = []
+        rrr = Favor.objects.filter(user=user, type="thread").order_by('-id')
+        for rr in rrr:
+            thread = Thread.objects.get(id=rr.from_id)
+            records.append(thread)
+    elif type == "user_thread":
+        try:
+            his_username = request.GET.get('his_username')
+            his_user = User.objects.get(username=his_username)
+        except:
+            his_user = None
+        records = Thread.objects.filter(user=his_user).order_by('-last_reply')
+
+    paginator = Paginator(records, 10)
+    threads = []
+
+    try:
+        for record in paginator.page(page).object_list:
+            try:
+                logging.debug("0")
+                comments = Reply.objects.filter(thread=record).order_by('id')
+                cc = []
+                for comment in comments:
+                    c = {
+                        "username":comment.user.username,
+                        "nickname":comment.user.userinfo.nickname,
+                        "thumb":comment.user.userinfo.thumb,
+                        "id":comment.id,
+                        "images":comment.images_1,
+                        "content":comment.content,
+                        "create_time":str(comment.create_time),
+                    }
+                    cc.append(c)
+                if record.user.userinfo.thumb == "(null)":
+                    thumb = ""
+                else:
+                    thumb = record.user.userinfo.thumb
+                logging.debug("1")
+
+                favor = False
+                try:
+                    ll = Favor.objects.get(user=user, type="thread",
+                                      from_id=record.id)
+                    if ll != None:
+                        favor = True
+                    else:
+                        favor = False
+                except:
+                    pass
+
+                like = False
+                try:
+                    ll = Like.objects.get(user=user, type="thread",
+                                      from_id=record.id)
+                    if ll != None:
+                        like = True
+                    else:
+                        like = False
+                except:
+                    pass
+
+                like_count = 0
+                try:
+                    ll = Like.objects.filter(type="thread",
+                                      from_id=record.id)
+                    if ll != None:
+                        like_count = ll.count()
+                except:
+                    pass
+                favor_count = 0
+                try:
+                    ll = Favor.objects.filter(type="thread",
+                                      from_id=record.id)
+                    if ll != None:
+                        favor_count = ll.count()
+                except:
+                    pass
+
+                logging.debug("2")
+
+                ar = {
+                    "username":record.user.username,
+                    "nickname":record.user.userinfo.nickname,
+                    "grade":get_grade(record.user.userinfo.point),
+                    "thumb":thumb,
+                    "id":record.id,
+                    "title":record.title,
+                    "content":record.content,
+                    "last_reply":str(record.last_reply),
+                    "images":record.images_1,
+                    "create_time":str(record.create_time),
+                    "like":like,
+                    "like_count":like_count,
+                    "favor_count":favor_count,
+                    "favor":favor,
+                    "comments":cc,
+                }
+                threads.append(ar)
+                logging.debug("3")
+            except Exception,e:
+                logging.debug("get_threads exception")
+                logging.debug(e)
+                continue
+    except:
+        logging.debug("page no")
+
+    str1 = json.dumps(threads)
+    return HttpResponse(str1)
+
 
 def get_bigpictures(request):
     page = request.GET.get("page", 1)
@@ -1067,7 +1526,7 @@ def get_user_atmessages(request):
     username = request.GET.get('username')
     user = User.objects.get(username=username)
 
-    atmessages = AtMessage.objects.filter(user=user).order_by('-id')
+    atmessages = AtMessage.objects.filter(user=user).order_by('-id')[:30]
     oo = []
     for atmessage in atmessages:
         o = {"id":atmessage.id,
@@ -1140,6 +1599,18 @@ def get_order(request):
     str1 = json.dumps(ret)
     return HttpResponse(str1)
 
+def set_discount(request):
+    from shop.models import Item 
+    items = Item.objects.all()
+    for item in items:
+        item.sold = 0
+        item.save()
+
+    ret = {"ret":"ok"}
+    str1 = json.dumps(ret)
+    return HttpResponse(str1)
+
+
 cmd_dict = {
     "get_articles":get_articles,
     "get_bigpictures":get_bigpictures,
@@ -1168,9 +1639,15 @@ cmd_dict = {
     "get_all_items":get_all_items,
     "new_order":new_order,
     "get_order":get_order,
+    "set_discount":set_discount,
     "get_user_orders":get_user_orders,
+    "get_user_threads":get_user_threads,
     "get_user_atmessages":get_user_atmessages,
     "mark_read_atmessage":mark_read_atmessage,
+    "like":like,
+    "unlike":like,
+    "favor":like,
+    "unfavor":like,
 }
 
 def process(request):

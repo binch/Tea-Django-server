@@ -1,13 +1,68 @@
 <html>
 	<head>
-		<title>{{title}}</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/> 
+		<title>{{content}}</title>
 	</head>
 	<body>
-		<div style="width:100%;font-size:48px;">
-			<b>{{title}}<b>
+		<div style="width:100%;font-size:18px;">
+			<div style="font-size:12px;">
+				<div style="float:left;width:30%;">
+					<a href="http://www.haorenao.cn/static/tea/index.html">
+						<img style="width:100%;" src="http://www.haorenao.cn/static/tea/logo.png">
+					</a>
+				</div>
+				<div style="float:left;width:60%;margin-left:10px;">
+					本文来自"茶友之家"。<br>
+					<br>
+					<br>
+					<br>
+					茶友之家，让品到好茶更简单。
+				</div>
+				<div style="clear:both;">
+				</div>
+			</div>
 			<hr>
-			{{content}}
+			<div style="margin-top:20px;" id="iconandcontent">
+				<div style="float:left;">
+					<img width="30" src="http://www.haorenao.cn/static/tea/threadimages/{{thumb}}">
+				</div>
+				<div style="float:left;width:260px;font-size:14px;margin-left:10px;">
+					<div style="float:left;color:#666666;font-size:12px;">
+						{{nickname}}
+					</div>
+					<div style="float:right;color:#666666;font-size:12px;">
+						{{grade}}
+					</div>
+					<div style="clear:both;">
+					</div>
+					<div style="margin-top:10px;">
+					{{content}}
+					</div>
+				</div>
+				<div style="clear:both;">
+				</div>
+				{%for img in images%}
+				<div style="width:80%;margin-top:10px;padding-left:40px;">
+					<img style="width:100%" src="http://www.haorenao.cn/static/tea/threadimages/{{img}}">
+				</div>
+				{%endfor%}
+			</div>
+			<hr>
+			<div style="">
+				评论：
+				{%for comment in comments%}
+				<div style="margin-top:1px;padding-top:5px;background-color:#EEEEEE;">
+					<div style="float:left;">
+						<img width="30" src="http://www.haorenao.cn/static/tea/threadimages/{{comment.thumb}}">
+					</div>
+					<div style="float:left;width:260px;font-size:14px;margin-left:10px;">
+						{{comment.content}}
+					</div>
+					<div style="clear:both;">
+					</div>
+				</div>
+				{%endfor%}
+			</div>
 		</div>
 	</body>
-
 </html>
