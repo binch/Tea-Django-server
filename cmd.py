@@ -1172,6 +1172,42 @@ def post_question(request):
 
     return HttpResponse(str1)
 
+def del_thread(request):
+    username = request.GET.get('username')
+    password = request.GET.get('password')
+    thread_id = request.GET.get('thread')
+
+    try:
+        thread = Thread.objects.get(id=int(thread_id))
+        if thread.user.username != username:
+            ret = {"ret":"failed", "reason":u'删除失败'}
+	else:
+	    thread.delete()
+            ret = {"ret":"ok"}
+    except:
+        ret = {"ret":"failed", "reason":u'删除失败'}
+
+    str1 = json.dumps(ret)
+    return HttpResponse(str1)
+
+def del_comment(request):
+    username = request.GET.get('username')
+    password = request.GET.get('password')
+    comment_id = request.GET.get('comment')
+
+    try:
+        comment = Reply.objects.get(id=int(comment_id))
+	if comment.user.username != username:
+            ret = {"ret":"failed", "reason":u'删除失败'}
+	else:
+	    comment.delete()
+            ret = {"ret":"ok"}
+    except:
+        ret = {"ret":"failed", "reason":u'删除失败'}
+
+    str1 = json.dumps(ret)
+    return HttpResponse(str1)
+
 def post_thread(request):
     board_id = request.GET.get('board')
     title = request.GET.get('title', '#')
@@ -1620,6 +1656,8 @@ cmd_dict = {
     "update_userinfo":update_userinfo,
     "get_threads":get_threads,
     "post_thread":post_thread,
+    "del_thread":del_thread,
+    "del_comment":del_comment,
     "post_question":post_question,
     "accept_answer":accept_answer,
     "post_reply":post_reply,
